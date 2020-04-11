@@ -1,1 +1,1 @@
-# cpu_usage_tracker
+# CPU Usage Tracker
