@@ -1,0 +1,14 @@
+Architecture of threads
+
+server.c
+  thread 1) listen to 'q' to exit
+  thread 2) delegate the job of socket communication (Category 2.3 - Multithread HTTP server)
+    * HTTP communication
+  thread 3) log CPU usage
+
+Todo:
+  * Carefully design the structure inside thread 2
+    * Q: how to deal with 1 update / second synchronization?
+
+Achievements
+  Completed: thread 1, thread 3
