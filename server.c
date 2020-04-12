@@ -6,30 +6,22 @@ http://www.binarii.com/files/papers/c_sockets.txt
  */
 
 #include <sys/types.h>
-
 #include <sys/socket.h>
-
 #include <netinet/in.h>
-
 #include <arpa/inet.h>
-
 #include <stdio.h>
-
 #include <stdlib.h>
-
 #include <unistd.h>
-
 #include <errno.h>
-
 #include <string.h>
 
-char* initial_http_response(char* response);
+#include <pthread.h>
+
+extern int cpu_idle_time();
+extern void update_cpu_statistics();
+extern char* initial_http_response(char* response);
 
 int start_server(int PORT_NUMBER) {
-
-	/* ------------------------------------------------------------------ */
-	/* ------------------ Part I: Establish Connection ------------------ */
-	/* ------------------------------------------------------------------ */
 
   // structs to represent the server and client
   struct sockaddr_in server_addr, client_addr;
@@ -69,12 +61,15 @@ int start_server(int PORT_NUMBER) {
   printf("\nServer configured to listen on port %d\n", PORT_NUMBER);
   fflush(stdout);
 
+//   // Branch out thread here
+//   pthread_t thread_communication; // Initialize thread struct
+//   pthread_create(&thread_communication, NULL, myThreadFun, NULL);
+
+//   // blocks the calling thread until the called thread terminates
+//   pthread_join(thread_id, NULL);
+
+
   int count = 0; // count the number of pages requested (for debugging purposes)
-
-
-	/* --------------------------------------------------------------------- */
-	/* --------------------- Part II: Active Listening --------------------- */
-	/* --------------------------------------------------------------------- */
 
   while (1) { // keep looping and accept additional incoming connections
 
@@ -97,10 +92,9 @@ int start_server(int PORT_NUMBER) {
       count++; // increment counter for debugging purposes
 
       // this is the message that we'll send back
-      char * response = (char * ) malloc(10000 * sizeof(char));
-			initial_http_response(response);
-
-//       sprintf(response, "HTTP/1.1 200 OK\nContent-Type: text/html\n\n<html><p>It works!<br>count=%d</p></html>", count);
+      int LEN_LIMIT = 10000;
+      char * response = (char * ) malloc(LEN_LIMIT * sizeof(char));
+      initial_http_response(response);
 
       printf("RESPONSE:\n%s\n", response);
 
@@ -123,6 +117,19 @@ int start_server(int PORT_NUMBER) {
   return 0;
 }
 
+
+
+/* -------------------------------------------------------------------------  */
+
+int idle_history [3600];
+int count = 0;
+double usage_max = 0;
+double usage_avg = 0;
+double usage_latest = 0 ;
+
+int port_number = 3000; // hard-coded for use on Codio
+#define MAX(a,b) (((a)>(b))?(a):(b))
+
 int main(int argc, char * argv[]) {
   /*
   // check the number of arguments
@@ -137,7 +144,46 @@ int main(int argc, char * argv[]) {
     exit(-1);
   }*/
 
-  int port_number = 3000; // hard-coded for use on Codio
 
-  start_server(port_number);
+  // Define entry functions
+  void* entry_thread_cpu(void* p){
+
+    while(1){
+			sleep(1);
+			idle_history[count] = cpu_idle_time();
+			update_cpu_statistics();
+			printf("\n---- CPU Statistics ----\n");
+// 			printf("Idle history: ");
+// 			for (int i = 0; i <= count; i++){
+// 				printf(" %d ", idle_history[count]);
+// 			}
+// 			printf("\n");
+			printf("max usage: %f \n", usage_max);
+			printf("avg usage: %f \n", usage_avg);
+			printf("lat usage: %f \n", usage_latest);
+			count = (count + 1) % 3600;
+		}
+		return NULL;
+  }
+
+  void* entry_thread_http(void* p){
+    start_server(port_number);
+  }
+
+  // Branch out thread here
+  pthread_t thread_cpu; // Initialize thread struct
+  pthread_t thread_http; // Initialize thread struct
+  pthread_create(&thread_cpu, NULL, entry_thread_cpu, NULL);  // Branch 1: Monitor CPU usage
+	pthread_create(&thread_http, NULL, entry_thread_http, NULL);  // Branch 2: Establish HTTP connection with browser
+
+  // Terminates monitoring
+	char user_input [100];
+  printf("Type 'q' and enter to exit. \n");
+  do {
+		fgets(user_input, 99, stdin);
+	}
+  while (strcmp(user_input,"q\n") != 0);
+
+	return 0;
+
 }
