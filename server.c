@@ -1,5 +1,5 @@
-/* 
-This code primarily comes from 
+/*
+This code primarily comes from
 http://www.prasannatech.net/2008/07/socket-programming-tutorial.html
 and
 http://www.binarii.com/files/papers/c_sockets.txt
@@ -23,7 +23,13 @@ http://www.binarii.com/files/papers/c_sockets.txt
 
 #include <string.h>
 
+char* initial_http_response(char* response);
+
 int start_server(int PORT_NUMBER) {
+
+	/* ------------------------------------------------------------------ */
+	/* ------------------ Part I: Establish Connection ------------------ */
+	/* ------------------------------------------------------------------ */
 
   // structs to represent the server and client
   struct sockaddr_in server_addr, client_addr;
@@ -65,6 +71,11 @@ int start_server(int PORT_NUMBER) {
 
   int count = 0; // count the number of pages requested (for debugging purposes)
 
+
+	/* --------------------------------------------------------------------- */
+	/* --------------------- Part II: Active Listening --------------------- */
+	/* --------------------------------------------------------------------- */
+
   while (1) { // keep looping and accept additional incoming connections
 
     // 4. accept: wait here until we get a connection on that port
@@ -86,13 +97,15 @@ int start_server(int PORT_NUMBER) {
       count++; // increment counter for debugging purposes
 
       // this is the message that we'll send back
-      char * response = (char * ) malloc(100 * sizeof(char));
-      sprintf(response, "HTTP/1.1 200 OK\nContent-Type: text/html\n\n<html><p>It works!<br>count=%d</p></html>", count);
+      char * response = (char * ) malloc(10000 * sizeof(char));
+			initial_http_response(response);
+
+//       sprintf(response, "HTTP/1.1 200 OK\nContent-Type: text/html\n\n<html><p>It works!<br>count=%d</p></html>", count);
 
       printf("RESPONSE:\n%s\n", response);
 
       // 6. send: send the outgoing message (response) over the socket
-      // note that the second argument is a char*, and the third is the number of chars	
+      // note that the second argument is a char*, and the third is the number of chars
       send(fd, response, strlen(response), 0);
 
       free(response);
