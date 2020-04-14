@@ -4,26 +4,79 @@ Checkpoint: The browser should be able to see the entire page
 Checkpoint: Server should be able to read the entire file and send in .c code
 -->
 
-<!-- <!DOCTYPE html> -->
+<!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <meta charset="utf-8">
     <title> Testing html to be sent over socket from server </title>
+    <style>
+    button {
+    font-size: 100%;
+    width: 150px;
+    height: 40px;
+    }
+
+    input {
+    font-size: 14px;
+    height: 40px;
+    text-align: center;
+    }
+
+    </style>
   </head>
 
   <body>
-    <h1 id='title_1'> This is h1 title </h1>
-    <h2> This is h2 title </h2>
+    <h1 id='title'> CPU Usage Monitor </h1>
 
-    <p> Line break below </p>
-    <br>
-    <p> Line break above </p>
+    <!-- Section 1: Numeric display -->
+    <div class="Display">
+      <h2> CPU Statistics</h2>
+      <table>
+      <tr>
+        <!-- QUESTION: How to display % in the box below -->
+        <!-- QUESTION: How to align the three boxes -->
+        CPU usage max: <input type="text" name="" value="" disabled>
+      </tr>
+      <br>
+      <tr>
+        CPU usage average: <input type="text" name="" value="" disabled>
+      </tr>
+      <br>
+      <tr>
+        CPU usage latest: <input type="text" name="" value="" disabled>
+      </tr>
+      </table>
+    </div>
 
-    <p> Input box below </p>
-    <input type="text" name="" value="">
+    <!-- Section 2: Chart -->
+    <h2> Chart </h2>
+    <div class="Chart">
+      <svg height="400" width="400" style="background-color:gray">
+        <rect />
+      </svg>
+    </div>
 
-<!-- 		<script type="text/javascript" src="/webpage.js"></script> -->
+    <!-- Section 3: Settings -->
+    <h2> Settings </h2>
+    <div class="Settings">
+
+    <!-- TODO: Set dividers betwen the three groups -->
+    <button type="button" name="Auto-update">Auto-update</button>
+    <br><br>
+
+    <!-- TODO: make box & button the same height -->
+    <input type="number" name="Threshold" value="">
+    <!-- <br> -->
+    <button type="button" name="Set threshold alarm">Set threshold alarm</button>
+    <br><br>
+
+    <input type="number" name="" value="">
+    <!-- <br> -->
+    <button type="button" name="Send frequency">Send frequency</button>
+
+    </div>
 
   </body>
+
 </html>
