@@ -19,7 +19,7 @@ III. Define and link helper functions for the settings
 
 /* --------------------------------------------------------------- */
 /* -------------------------- Variables -------------------------- */
-var usage_max = 0, usage_avg = 0, usage_latest = 0;
+var usage_max = undefined, usage_avg = undefined, usage_latest = undefined;
 
 var config = {
   width : 300,
@@ -31,7 +31,7 @@ var config = {
 };
 // var config = char
 
-var auto_update = true;
+var auto_update = false;
 var threshold = undefined;
 var frequency = 1; // communication frequency and display interval
 
@@ -85,15 +85,10 @@ svg.append('g')
 
 
 function update(){
-  // 1. Communicate
   communication();
-  // 2. Update the display
   update_numbers();
   update_chart();
-  if (threshold && usage_lates > threshold){
-    alarm_threshold();
-  }
-
+  threshold_alarm();
 }
 
 function change_frequency(){
@@ -102,13 +97,24 @@ function change_frequency(){
   update_chart();
 }
 
-
-/* -------------------------------------------------------------- */
-/* ---------------------- Helper functions ---------------------- */
-function communication(){
-
+function alarm_threshold(){
+  if (threshold){ // Disable alarm
+    threshold = undefined;
+  } else { // Enable alarm
+    threshold = $('#threshold_input').val();
+    $('#threshold_input').val('');
+  }
 }
 
+function threshold_alarm(){
+  if (threshold && usage_latest > threshold){
+    // TODO: alarm
+
+    // QUESTION: Do I cancel alarm after one-time alarm?
+  }
+}
+/* -------------------------------------------------------------- */
+/* ---------------------- Helper functions ---------------------- */
 function update_numbers(){
   $('#usage_max').val(usage_max);
   $('#usage_avg').val(usage_avg);
@@ -119,33 +125,40 @@ function update_chart(){
   // Note: update x-axis range
 }
 
-function alarm_threshold(){
 
+
+function communication(){
+  $.getJSON("/data", function (data, status) {
+    count = data.count;
+    usage_max = data.usage_max;
+    usage_avg = data.usage_avg;
+    usage_latest = data.usage_latest;
+  })
 }
 
-function update(){
-  console.log('Try me clicked');
-  $.getJSON("/data", extract_information);
-  update_numbers();
-  update_chart();
-  console.log('Update completed');
-}
-
-function extract_information(data, status){
-  count = data.count;
-  usage_max = data.usage_max;
-  usage_avg = data.usage_avg;
-  usage_latest = data.usage_latest;
-	console.log(usage.latest);
-  console.log(status);
-}
-
-$('#try_button').click(update);
 
 
-
-
-
+// $('#try_button').click(update);
 
 /* -------------------------------------------------------------- */
 /* --------------------------- jQuery --------------------------- */
+update();
+$('#auto_update_button').click(auto_update_switch);
+
+function auto_update_switch () {
+  console.log(auto_update);
+  // console.log($('#auto_update_status').toggleClass());
+  if (auto_update){
+    clearInterval(auto_update_handle);
+    auto_update = false;
+    $('#auto_update_status').addClass('off');
+    $('#auto_update_status').removeClass('on');
+    $('#auto_update_status').val('Off');
+  } else {
+    auto_update = true;
+    auto_update_handle = setInterval(update, frequency * 1000);
+    $('#auto_update_status').removeClass('off');
+    $('#auto_update_status').addClass('on');
+    $('#auto_update_status').val('On');
+  }
+}

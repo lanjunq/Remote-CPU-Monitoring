@@ -34,6 +34,12 @@ Checkpoint: Server should be able to read the entire file and send in .c code
       height: 40px;
       text-align: center;
     }
+    .off {
+      background-color: gray;
+    }
+    .on {
+      background-color: green;
+    }
     </style>
 
   </head>
@@ -75,14 +81,14 @@ Checkpoint: Server should be able to read the entire file and send in .c code
     <div class="Settings">
 
     <!-- TODO: Set dividers betwen the three groups -->
-    <input id='auto_update_status' type="text" name="Auto-update status" value="Off" disabled> <!-- TODO: add a visual cue -->
+    <input id='auto_update_status' class='off' type="text" name="Auto-update status" value="Off" disabled>
     <button id='auto_update_button' type="button" name="Auto-update">Auto-update</button>
     <br><br>
 
     <!-- TODO: make box & button the same height -->
     <input id='threshold_input' type="number" min='0' name="Threshold" value="">
     <!-- <br> -->
-    <button tid='threshold_button' ype="button" name="Set threshold alarm">Set threshold alarm</button>
+    <button tid='threshold_button' type="button" name="Set threshold alarm">Set threshold alarm</button>
     <br><br>
 
     <input id='frequency_input' type="number" min='1' name="" value="">
@@ -92,11 +98,11 @@ Checkpoint: Server should be able to read the entire file and send in .c code
     </div>
 
     <!-- Section: test -->
-    <br>
+    <!-- <br>
     <h3>Test</h3>
     <div class="test">
       <button id='try_button' type="button" name="test_json">Try Me</button>
-    </div>
+    </div> -->
 
     <script type="text/javascript" src='webpage.js'></script>
 
