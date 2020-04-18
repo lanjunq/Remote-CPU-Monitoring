@@ -20,6 +20,8 @@ http://www.binarii.com/files/papers/c_sockets.txt
 extern int cpu_idle_time();
 extern void update_cpu_statistics();
 extern char* initial_http_response(char* response);
+extern char* initial_http_update(char* response);
+int running = 1;
 
 int start_server(int PORT_NUMBER) {
 
@@ -76,6 +78,7 @@ int start_server(int PORT_NUMBER) {
     // 4. accept: wait here until we get a connection on that port
     int sin_size = sizeof(struct sockaddr_in);
     int fd = accept(sock, (struct sockaddr * ) & client_addr, (socklen_t * ) & sin_size);
+//     printf("fd info: %s \n", fd);
     if (fd != -1) {
       printf("Server got a connection from (%s, %d)\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
@@ -89,12 +92,24 @@ int start_server(int PORT_NUMBER) {
       // print it to standard out
       printf("REQUEST:\n%s\n", request);
 
+      // decompose the GET request
+			printf("resource to GET\n");
+      char* get = strtok(request, " ");
+			printf("1: \"%s\" \n", get);
+      get = strtok(NULL, " ");
+			printf("2: \"%s\" \n", get);
+
+
       count++; // increment counter for debugging purposes
 
       // this is the message that we'll send back
       int LEN_LIMIT = 10000;
       char * response = (char * ) malloc(LEN_LIMIT * sizeof(char));
-      initial_http_response(response);
+      if (strcmp(get, "/data") == 0){
+        initial_http_update(response);
+      } else {
+        initial_http_response(response);
+      }
 
       printf("RESPONSE:\n%s\n", response);
 
@@ -152,15 +167,10 @@ int main(int argc, char * argv[]) {
 			sleep(1);
 			idle_history[count] = cpu_idle_time();
 			update_cpu_statistics();
-			printf("\n---- CPU Statistics ----\n");
-// 			printf("Idle history: ");
-// 			for (int i = 0; i <= count; i++){
-// 				printf(" %d ", idle_history[count]);
-// 			}
-// 			printf("\n");
-			printf("max usage: %f \n", usage_max);
-			printf("avg usage: %f \n", usage_avg);
-			printf("lat usage: %f \n", usage_latest);
+// 			printf("\n---- CPU Statistics ----\n");
+// 			printf("max usage: %f \n", usage_max);
+// 			printf("avg usage: %f \n", usage_avg);
+// 			printf("lat usage: %f \n", usage_latest);
 			count = (count + 1) % 3600;
 		}
 		return NULL;
@@ -183,6 +193,9 @@ int main(int argc, char * argv[]) {
 		fgets(user_input, 99, stdin);
 	}
   while (strcmp(user_input,"q\n") != 0);
+// 	close(sock);
+  printf("Server shutting down\n");
+// 	pthread_join(thread_http, NULL);
 
 	return 0;
 

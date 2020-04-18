@@ -110,7 +110,9 @@ function communication(){
 }
 
 function update_numbers(){
-
+  $('#usage_max').val(usage_max);
+  $('#usage_avg').val(usage_avg);
+  $('#usage_latest').val(usage_latest);
 }
 
 function update_chart(){
@@ -120,6 +122,26 @@ function update_chart(){
 function alarm_threshold(){
 
 }
+
+function update(){
+  console.log('Try me clicked');
+  $.getJSON("/data", extract_information);
+  update_numbers();
+  update_chart();
+  console.log('Update completed');
+}
+
+function extract_information(data, status){
+  count = data.count;
+  usage_max = data.usage_max;
+  usage_avg = data.usage_avg;
+  usage_latest = data.usage_latest;
+	console.log(usage.latest);
+  console.log(status);
+}
+
+$('#try_button').click(update);
+
 
 
 

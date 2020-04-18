@@ -10,8 +10,41 @@ Functions to be defined:
   1.
  */
 
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+extern int idle_history [3600];
+extern int count;
+extern double usage_max;
+extern double usage_avg;
+extern double usage_latest;
+
+char* initial_http_update(char* response){
+  char response_header [] = "HTTP/1.1 200 OK\nContent-Type: application/JSON\n\n";
+  strcpy(response, response_header);
+  // example JSON: {\"name\" : \"snoopy\", \"id\" : 12345}"
+
+  char response_json [100];
+
+	strcat(response, "{");
+	sprintf(response_json, "\"%s\" : %d", "count", count);
+  strcat(response, response_json);
+	strcat(response, " , ");
+
+  sprintf(response_json, "\"%s\" : %f", "usage_max", usage_max);
+  strcat(response, response_json);
+	strcat(response, " , ");
+
+  sprintf(response_json, "\"%s\" : %f", "usage_avg", usage_avg);
+  strcat(response, response_json);
+	strcat(response, " , ");
+
+	sprintf(response_json, "\"%s\" : %f", "usage_latest", usage_latest);
+  strcat(response_json, "}");
+  strcat(response, response_json);
+
+	return response;
+}
 
 char* initial_http_response(char* response){
 
