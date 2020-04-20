@@ -22,13 +22,12 @@ extern void update_cpu_statistics();
 extern char* initial_http_response(char* response);
 extern char* initial_http_update(char* response);
 int running = 1;
+int sock; // socket descriptor
 
 int start_server(int PORT_NUMBER) {
 
   // structs to represent the server and client
   struct sockaddr_in server_addr, client_addr;
-
-  int sock; // socket descriptor
 
   // 1. socket: creates a socket descriptor that you later use to make other system calls
   if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
@@ -193,7 +192,7 @@ int main(int argc, char * argv[]) {
 		fgets(user_input, 99, stdin);
 	}
   while (strcmp(user_input,"q\n") != 0);
-// 	close(sock);
+	close(sock);
   printf("Server shutting down\n");
 // 	pthread_join(thread_http, NULL);
 
