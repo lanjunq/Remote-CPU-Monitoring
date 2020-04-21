@@ -1,48 +1,37 @@
-<!--
-Objective: create a fictional html and use server to send to the browser
-Checkpoint: The browser should be able to see the entire page
-Checkpoint: Server should be able to read the entire file and send in .c code
--->
-
-<!--
------------------------------------------------------------------------
------------------------------- Todo List ------------------------------
-[ ] Add left-boundary
- -->
-
+<!-- Initial webpage to be sent when the server receives the first HTTP request -->
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
-
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
-
     <meta charset="utf-8">
     <title> Server CPU Monitor </title>
 
     <style>
+
+    /* Set offset from the browser boundary */
     body {
       /* margin-left: 100px; */
       /* margin-top: 50px; */
     }
-    button {
+    button {  /* Botton visual configurations */
       font-size: 100%;
       width: 150px;
       height: 40px;
     }
-    input {
+    input {   /* Input box visual configurations */
       font-size: 14px;
       height: 40px;
       text-align: center;
     }
     input[type=number]{
-      -moz-appearance: textfield;
+      -moz-appearance: textfield; /* Remove the toggle from the input box */
     }
     .off {
-      background-color: #f2f2f2;
+      background-color: #f2f2f2;  /* Set the off-mode background color here */
     }
     .on {
-      background-color: #ccffcc;
+      background-color: #ccffcc;  /* Set the on-mode background color here */
     }
     </style>
 
@@ -52,7 +41,7 @@ Checkpoint: Server should be able to read the entire file and send in .c code
   <body>
     <h1 id='title'> CPU Usage Monitor </h1>
 
-    <!-- Section 1: Numeric display -->
+    <!-------------------- Section 1: Numeric display ---------------------->
     <div class="Statistics">
       <h2> Statistics </h2>
       <table>
@@ -71,49 +60,40 @@ Checkpoint: Server should be able to read the entire file and send in .c code
       </table>
     </div>
 
-    <!-- Section 2: Chart -->
+
+    <!------------------------ Section 2: Chart ------------------------>
     <h2> Chart </h2>
     <div class="Chart">
-      <svg height="400" width="400"> <!-- QUESTION: Is height and width required? -->
+       <svg height="400" width="400"> <!-- Initialize the svg section with a random size -->
         <rect />
       </svg>
     </div>
 
-    <!-- Section 3: Settings -->
+
+    <!------------------------ Section 3: User Settings ----------------------->
     <h2> Settings </h2>
     <div class="Settings">
 
-    <!-- TODO: Set dividers betwen the three groups -->
+    <!-- Auto-update section -->
     <input id='auto_update_status' class='off' type="text" name="Auto-update status" value="Off" disabled>
     <button id='auto_update_button' type="button" name="Auto-update">Auto-update</button>
     <br><br>
 
-    <!-- TODO: make box & button the same height -->
+    <!-- Threshold alarm section -->
     <input id='threshold_input' type="number" min='0' name="Threshold" value="">
-    <!-- <br> -->
     <button id='threshold_button' type="button" name="Set threshold alarm">Set threshold alarm</button>
     <br><br>
 
+    <!-- Update frequency section -->
     <input id='frequency_input' type="number" min='1' name="" value="">
-    <!-- <br> -->
     <button id='frequency_button' type="button" name="Send frequency">Send frequency</button>
 
     </div>
 
-    <!-- Section: test -->
-    <!-- <br>
-    <h3>Test</h3>
-    <div class="test">
-      <button id='try_button' type="button" name="test_json">Try Me</button>
-    </div> -->
-
+    <!------------------------ Section 4: JavaScript File ----------------------->
     <script type="text/javascript" src='webpage.js'></script>
+
 
   </body>
 
 </html>
-
-<!--
------------------------- Todo List ------------------------
-[ ] Add description to the setting area
- -->
