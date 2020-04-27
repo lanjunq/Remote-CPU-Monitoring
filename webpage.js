@@ -57,7 +57,10 @@ svg.append('g')
 svg.append('g').append('rect')
   .attr('transform', `translate(${config.x_offset}, ${(1-usage_latest/100) * config.yAxis_len})`) // Initialize the bar display
   .attr('width', `${config.xAxis_len}`)
-  .attr('height', '0');
+  .attr('height', '0')
+  // .style('fill', 'gray');
+  .style('fill', '#f2f2f2');
+  // .style('fill', '#e6f7ff');
 
 
 /* -------------------------------------------------------------- */
@@ -118,7 +121,7 @@ function update(){
 /* Helper function to update the chart display section on the webpage */
 function update_chart(){
   $('rect')
-    .attr('transform', `translate(${config.x_offset}, ${config.y_offset-usage_latest/100 * config.yAxis_len})`)
+    .attr('transform', `translate(${config.x_offset+1}, ${config.y_offset-usage_latest/100 * config.yAxis_len})`)
     .attr('height', `${usage_latest/100 * config.yAxis_len}`);
 }
 

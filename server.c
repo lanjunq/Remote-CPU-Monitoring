@@ -18,7 +18,6 @@ int running = 1;
 int sock; // socket descriptor
 int fd;
 
-
 int idle_history [3600];
 int count = 0;
 double usage_max = 0;
@@ -27,6 +26,10 @@ double usage_latest = 0 ;
 
 int port_number = 3000; // hard-coded for use on Codio
 #define MAX(a,b) (((a)>(b))?(a):(b))
+
+pthread_mutex_t lock; // for CPU statistics
+pthread_mutex_t lock_2; // for global variable running, sock, and fd
+pthread_mutex_t lock_3; // for printf()
 
 
 /* Helper function to start_server and establish socket */
@@ -66,72 +69,120 @@ int start_server(int PORT_NUMBER) {
   }
 
   // once you get here, the server is set up and about to start listening
-  printf("\nServer configured to listen on port %d\n", PORT_NUMBER);
+	pthread_mutex_lock( &lock_3 );
+//   printf("\nServer configured to listen on port %d\n", PORT_NUMBER);
+	pthread_mutex_unlock( &lock_3 );
   fflush(stdout);
 
   // int count = 0; // count the number of pages requested (for debugging purposes)
+	pthread_mutex_lock( &lock_2 );
   while (running == 1) { // keep looping and accept additional incoming connections
+		pthread_mutex_unlock( &lock_2 );
 
     // 4. accept: wait here until we get a connection on that port
     int sin_size = sizeof(struct sockaddr_in);
-    fd = accept(sock, (struct sockaddr * ) & client_addr, (socklen_t * ) & sin_size);
-    if (fd != -1) {
-    printf("Server got a connection from (%s, %d)\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+// 		alarm(2);
+		pthread_mutex_lock( &lock_2 );
+		int fd_copy = fd;
+		int sock_copy = sock;
+		pthread_mutex_unlock( &lock_2 );
 
-    // 5. recv: read and echo HTTP request
-    char request[1024]; // buffer to read data into
-    int bytes_received = recv(fd, request, 1024, 0);
-    request[bytes_received] = '\0';
-    printf("REQUEST:\n%s\n", request);
+    fd_copy = accept(sock_copy, (struct sockaddr * ) & client_addr, (socklen_t * ) & sin_size);
 
-    // HTTP response
-    char* get = strtok(request, " ");
-    get = strtok(NULL, " ");
+		pthread_mutex_lock( &lock_2 );
+		fd = fd_copy;
+		sock = sock_copy;
+// 		pthread_mutex_unlock( &lock_2 );
 
-    int LEN_LIMIT = 10000;
-    char * response = (char * ) malloc(LEN_LIMIT * sizeof(char));
-    if (strcmp(get, "/data") == 0){
-      initial_http_update(response);
-    } else {
-      initial_http_response(response);
-    }
-    printf("RESPONSE:\n%s\n", response); // echo HTTP response
+		if (fd != -1) {
+			pthread_mutex_unlock( &lock_2 );
+			pthread_mutex_lock( &lock_3 );
+// 			printf("Server got a connection from (%s, %d)\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+			pthread_mutex_unlock( &lock_3 );
 
-    // 6. send: send the outgoing message (response) over the socket
-    // note that the second argument is a char*, and the third is the number of chars
-    send(fd, response, strlen(response), 0);
+			// 5. recv: read and echo HTTP request
+			char request[1024]; // buffer to read data into
+			pthread_mutex_lock( &lock_2 );
+			int bytes_received = recv(fd, request, 1024, 0);
+			pthread_mutex_unlock( &lock_2 );
+			request[bytes_received] = '\0';
+			pthread_mutex_lock( &lock_3 );
+// 			printf("REQUEST:\n%s\n", request);
+			pthread_mutex_unlock( &lock_3 );
 
-    // 7. close: close the connection
-    free(response);
-    close(fd);
-    printf("Server closed connection\n");
-    }
+			// HTTP response
+			char* get = strtok(request, " ");
+			get = strtok(NULL, " ");
+
+			int LEN_LIMIT = 10000;
+			char * response = (char * ) malloc(LEN_LIMIT * sizeof(char));
+			if (strcmp(get, "/data") == 0){
+				initial_http_update(response);
+			} else {
+				initial_http_response(response);
+			}
+			pthread_mutex_lock( &lock_3 );
+// 			printf("RESPONSE:\n%s\n", response); // echo HTTP response
+			pthread_mutex_unlock( &lock_3 );
+
+			// 6. send: send the outgoing message (response) over the socket
+			// note that the second argument is a char*, and the third is the number of chars
+			pthread_mutex_lock( &lock_2 );
+			send(fd, response, strlen(response), 0);
+			pthread_mutex_unlock( &lock_2 );
+
+			// 7. close: close the connection
+			free(response);
+			pthread_mutex_lock( &lock_2 );
+			close(fd);
+			pthread_mutex_unlock( &lock_2 );
+			pthread_mutex_lock( &lock_3 );
+// 			printf("Server closed connection\n");
+			pthread_mutex_unlock( &lock_3 );
+		} else {
+			pthread_mutex_unlock( &lock_2 );
+		}
+		pthread_mutex_lock( &lock_2 );
   }
+	pthread_mutex_unlock( &lock_2 );
 
   // 8. close: close the socket
+  pthread_mutex_lock( &lock_2 );
   close(sock);
+	pthread_mutex_unlock( &lock_2 );
+	pthread_mutex_lock( &lock_3 );
   printf("Server shutting down\n");
+	pthread_mutex_unlock( &lock_3 );
   return 0;
 }
 
 /* Helper function to print CPU statistics to stdout */
 void print_cpu_statistics(){
+	pthread_mutex_lock( &lock_3 );
   printf("\n---- CPU Statistics ----\n");
   printf("max usage: %f \n", usage_max);
   printf("avg usage: %f \n", usage_avg);
   printf("lat usage: %f \n", usage_latest);
+	pthread_mutex_unlock( &lock_3 );
 }
 
 /* Define entry function to CPU thread */
 void* entry_thread_cpu(void* p){
-
-  while(1){
-    sleep(1);
+	pthread_mutex_lock( &lock_2 );
+  while(running == 1){
+		pthread_mutex_unlock( &lock_2 );
+			pthread_mutex_lock( &lock );
     idle_history[count] = cpu_idle_time();  // get latest idle_time
+			pthread_mutex_unlock( &lock );
     update_cpu_statistics();  // update global variables
-    print_cpu_statistics();   // show to stdout
+//     print_cpu_statistics();   // show to stdout
+    	pthread_mutex_lock( &lock );
     count = (count + 1) % 3600;
+			pthread_mutex_unlock( &lock );
+		sleep(1);
+		pthread_mutex_lock( &lock_2 );
   }
+	pthread_mutex_unlock( &lock_2 );
   return NULL;
 }
 
@@ -147,20 +198,44 @@ int main(int argc, char * argv[]) {
   // Create threads
   pthread_t thread_cpu; // Initialize thread struct
   pthread_t thread_http; // Initialize thread struct
+
+	int ret = pthread_mutex_init( &lock, NULL );
+	int ret_2 = pthread_mutex_init( &lock_2, NULL );
+	int ret_3 = pthread_mutex_init( &lock_3, NULL );
+	if ( ret == -1 || ret_2 == -1 ) {
+		printf("ERROR: Mutex");
+		exit(-1);
+	}
+
+// int pthread_mutex_lock(pthread_mutex_t *mutex)
+
+// int pthread_mutex_unlock(pthread_mutex_t *mutex)
+// int pthread_mutex_destroy(pthread_mutex_t *mutex)
+
   pthread_create(&thread_cpu, NULL, entry_thread_cpu, NULL);  // Branch 1: Monitor CPU usage
 	pthread_create(&thread_http, NULL, entry_thread_http, NULL);  // Branch 2: Establish HTTP connection with browser
 
   // Main thread monitors user input
+	pthread_mutex_lock( &lock_3 );
   printf("Type 'q' and enter to exit. \n");
+	pthread_mutex_unlock( &lock_3 );
 	char user_input [100];
   do {
 		fgets(user_input, 99, stdin);
 	}
   while (strcmp(user_input,"q\n") != 0);
 
+	pthread_mutex_lock( &lock_2 );
+	running = 0;
 	shutdown(sock, SHUT_RDWR);
   close(fd);
-  close(sock);
+	close(sock);
+	pthread_mutex_unlock( &lock_2 );
+
+	pthread_join(thread_cpu, NULL);
+	pthread_join(thread_http, NULL);
+	pthread_mutex_lock( &lock_3 );
   printf("Server shutting down\n");
+	pthread_mutex_unlock( &lock_3 );
 	return 0;
 }

@@ -3,11 +3,17 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <pthread.h>
+
 extern int idle_history [3600];
 extern int count;
 extern double usage_max;
 extern double usage_avg;
 extern double usage_latest;
+
+extern pthread_mutex_t lock;
+extern pthread_mutex_t lock_2;
+extern pthread_mutex_t lock_3;
 
 
 /* Helper function to generate JSON update HTTP response */
@@ -18,9 +24,13 @@ char* initial_http_update(char* response){
   char response_json [100];
 
 	strcat(response, "{");
+	pthread_mutex_lock( &lock );
 	sprintf(response_json, "\"%s\" : %d", "count", count);
+	pthread_mutex_unlock( &lock );
   strcat(response, response_json);
 	strcat(response, " , ");
+
+	pthread_mutex_lock( &lock );
 
   sprintf(response_json, "\"%s\" : %f", "usage_max", usage_max);
   strcat(response, response_json);
@@ -33,6 +43,8 @@ char* initial_http_update(char* response){
 	sprintf(response_json, "\"%s\" : %f", "usage_latest", usage_latest);
   strcat(response_json, "}");
   strcat(response, response_json);
+
+	pthread_mutex_unlock( &lock );
 
 	return response;
 }
@@ -56,9 +68,10 @@ char* initial_http_response(char* response){
   char* response_javascript = (char *) malloc(LIMIT * sizeof(char));
 	char* content_js = (char *) malloc(LIMIT * sizeof(char));
   fp = fopen("webpage.js", "r");
-  fread(content_js, sizeof(char), LIMIT-1, fp);
+  int len = fread(content_js, sizeof(char), LIMIT-1, fp);
+	content_js[len] = '\0';
 	// int len = sprintf(response_javascript, "<html>\n<body>\n<script>\n%s\n</script>\n</body>\n</html>", content_js);
-  int len = sprintf(response_javascript, "<script>\n%s\n</script>\n</body>\n</html>", content_js);
+  len = sprintf(response_javascript, "<script>\n%s\n</script>\n</body>\n</html>", content_js);
   response_javascript[len] = '\0';
   fclose(fp);
 
