@@ -4,6 +4,7 @@
 var usage_max = undefined;
 var usage_avg = undefined;
 var usage_latest = undefined;
+var count = undefined;
 
 // webpage property variables
 var auto_update = false;            // auto-update is on(true) or off(false)
@@ -114,13 +115,6 @@ function update(){
   threshold_alarm();
 }
 
-/* Helper function to udpate the CPU statistics section on the webpage */
-function update_numbers(){
-  $('#usage_max').val(usage_max);
-  $('#usage_avg').val(usage_avg);
-  $('#usage_latest').val(usage_latest);
-}
-
 /* Helper function to update the chart display section on the webpage */
 function update_chart(){
   $('rect')
@@ -136,7 +130,20 @@ function communication(){
     usage_max = data.usage_max;
     usage_avg = data.usage_avg;
     usage_latest = data.usage_latest;
+    update_numbers(); // QUESTION: Does this cause update frequency problem?
   })
+    .fail(function() {
+			disable_auto_update();
+      console.log('getJSON fails');
+			$.getJSON("");
+    })
+}
+
+/* Helper function to udpate the CPU statistics section on the webpage */
+function update_numbers(){
+  $('#usage_max').val(usage_max);
+  $('#usage_avg').val(usage_avg);
+  $('#usage_latest').val(usage_latest);
 }
 
 /* Helper function to alarm CPU usage pass threshold */
@@ -159,7 +166,8 @@ function refresh_update_frequency(){
 /* -------------------------------------------------------------- */
 /* --------------------------- jQuery --------------------------- */
 // Associate buttons to corresponding callback functions
-update();
 $('#auto_update_button').click(enable_auto_update);
 $('#threshold_button').click(set_threshold);
 $('#frequency_button').click(change_frequency);
+
+update();
