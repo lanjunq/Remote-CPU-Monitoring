@@ -207,11 +207,6 @@ int main(int argc, char * argv[]) {
 		exit(-1);
 	}
 
-// int pthread_mutex_lock(pthread_mutex_t *mutex)
-
-// int pthread_mutex_unlock(pthread_mutex_t *mutex)
-// int pthread_mutex_destroy(pthread_mutex_t *mutex)
-
   pthread_create(&thread_cpu, NULL, entry_thread_cpu, NULL);  // Branch 1: Monitor CPU usage
 	pthread_create(&thread_http, NULL, entry_thread_http, NULL);  // Branch 2: Establish HTTP connection with browser
 
@@ -234,8 +229,5 @@ int main(int argc, char * argv[]) {
 
 	pthread_join(thread_cpu, NULL);
 	pthread_join(thread_http, NULL);
-	pthread_mutex_lock( &lock_3 );
-  printf("Server shutting down\n");
-	pthread_mutex_unlock( &lock_3 );
 	return 0;
 }

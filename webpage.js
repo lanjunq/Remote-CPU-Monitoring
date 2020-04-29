@@ -58,9 +58,7 @@ svg.append('g').append('rect')
   .attr('transform', `translate(${config.x_offset}, ${(1-usage_latest/100) * config.yAxis_len})`) // Initialize the bar display
   .attr('width', `${config.xAxis_len}`)
   .attr('height', '0')
-  // .style('fill', 'gray');
-  .style('fill', '#f2f2f2');
-  // .style('fill', '#e6f7ff');
+  .style('fill', '#95f095'); // bar color
 
 
 /* -------------------------------------------------------------- */
@@ -134,6 +132,7 @@ function communication(){
     usage_avg = data.usage_avg;
     usage_latest = data.usage_latest;
     update_numbers(); // QUESTION: Does this cause update frequency problem?
+    update_chart();
   })
     .fail(function() {
 			disable_auto_update();
@@ -145,7 +144,7 @@ function communication(){
 /* Helper function to udpate the CPU statistics section on the webpage */
 function update_numbers(){
   $('#usage_max').val(usage_max);
-  $('#usage_avg').val(usage_avg);
+  $('#usage_avg').val(Math.round(usage_avg * 100) / 100);
   $('#usage_latest').val(usage_latest);
 }
 

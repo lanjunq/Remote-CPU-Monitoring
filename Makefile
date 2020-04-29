@@ -1,18 +1,19 @@
-main: server.c http_response.c
-	cc -o server server.c http_response.c
+compile: server.c http_response.c cpu_monitoring.c
+	cc -o server server.c http_response.c cpu_monitoring.c -pthread
+
+run: compile
 	./server
 
-test_interface: server_send_html.c
-	cc -o test_interface server_send_html.c
-	./test_interface
+valgrind: compile
+	valgrind ./server
 
-test_architecture: server_architecture.c cpu_idle_time.c
-	cc -o test_architecture server_architecture.c cpu_idle_time.c -pthread
-	./test_architecture
-
-test_http_response: http_response.c
-	cc -o http_response http_response.c
-	./http_response
+helgrind: compile
+	valgrind --tool=helgrind ./server
 
 clean:
-	rm test_interface server
+	rm test_interface server http_response -f
+
+
+# Install valgrind package
+install_helgrind:
+	sudo apt-get install valgrind
