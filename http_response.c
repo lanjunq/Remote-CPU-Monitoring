@@ -31,7 +31,7 @@ char* initial_http_update(char* response){
 	strcat(response, " , ");
 
 	pthread_mutex_lock( &lock );
-
+		
   sprintf(response_json, "\"%s\" : %f", "usage_max", usage_max);
   strcat(response, response_json);
 	strcat(response, " , ");
@@ -43,7 +43,7 @@ char* initial_http_update(char* response){
 	sprintf(response_json, "\"%s\" : %f", "usage_latest", usage_latest);
   strcat(response_json, "}");
   strcat(response, response_json);
-
+	
 	pthread_mutex_unlock( &lock );
 
 	return response;

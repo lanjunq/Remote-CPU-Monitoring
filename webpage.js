@@ -58,7 +58,9 @@ svg.append('g').append('rect')
   .attr('transform', `translate(${config.x_offset}, ${(1-usage_latest/100) * config.yAxis_len})`) // Initialize the bar display
   .attr('width', `${config.xAxis_len}`)
   .attr('height', '0')
+  // .style('fill', 'gray');
   .style('fill', '#95f095'); // bar color
+  // .style('fill', '#e6f7ff');
 
 
 /* -------------------------------------------------------------- */

@@ -34,7 +34,7 @@ int cpu_idle_time(){
 		pthread_mutex_lock( &lock_2 );
 	}
 	pthread_mutex_unlock( &lock_2 );
-
+	
 	idle_time = atoi(start);
 
 	fclose(fp);
